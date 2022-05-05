@@ -1,6 +1,7 @@
 import 'package:budget_tracker_notion_ng/budget_repository.dart';
 import 'package:budget_tracker_notion_ng/failure_model.dart';
 import 'package:budget_tracker_notion_ng/item_model.dart';
+import 'package:budget_tracker_notion_ng/spending_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/intl.dart';
@@ -57,9 +58,10 @@ class _BudgetScreenState extends State<BudgetScreen> {
             final items = snapshot.data!;
 
             return ListView.builder(
-              itemCount: items.length,
+              itemCount: items.length + 1,
               itemBuilder: (BuildContext context, int index) {
-                final item = items[index];
+                if (index == 0) return SpendingChart(items: items);
+                final item = items[index - 1];
                 return Container(
                   margin: const EdgeInsets.all(8.0),
                   decoration: BoxDecoration(
@@ -108,7 +110,7 @@ Color getCategoryColor(String category) {
     case 'Personal':
       return Colors.blue[400]!;
     case 'Transportation':
-      return Colors.orange[400]!;
+      return Colors.purple[400]!;
     default:
       return Colors.orange[400]!;
   }
