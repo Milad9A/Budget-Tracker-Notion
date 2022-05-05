@@ -50,52 +50,58 @@ class _BudgetScreenState extends State<BudgetScreen> {
         title:
             const Text('Budget Tracker', style: TextStyle(color: Colors.black)),
       ),
-      body: FutureBuilder(
-        future: _futureItems,
-        builder: (BuildContext context, AsyncSnapshot snapshot) {
-          if (snapshot.hasData) {
-            // Show pie chart and list view of items.
-            final items = snapshot.data!;
-
-            return ListView.builder(
-              itemCount: items.length + 1,
-              itemBuilder: (BuildContext context, int index) {
-                if (index == 0) return SpendingChart(items: items);
-                final item = items[index - 1];
-                return Container(
-                  margin: const EdgeInsets.all(8.0),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10.0),
-                    border: Border.all(
-                      width: 2.0,
-                      color: getCategoryColor(item.category),
-                    ),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Colors.black26,
-                        offset: Offset(0, 2),
-                        blurRadius: 6.0,
-                      )
-                    ],
-                  ),
-                  child: ListTile(
-                    title: Text(item.name),
-                    subtitle: Text(
-                        '${item.category} • ${DateFormat.yMd().format(item.date)}'),
-                    trailing: Text('-\$${item.price.toStringAsFixed(2)}'),
-                  ),
-                );
-              },
-            );
-          } else if (snapshot.hasError) {
-            // Show failure error message.
-            final failure = snapshot.error as Failure;
-            return Center(child: Text(failure.message));
-          }
-          // Show a loading spinner.
-          return const Center(child: CircularProgressIndicator());
+      body: RefreshIndicator(
+        onRefresh: () async {
+          _futureItems = BudgetRepository().getItems();
+          setState(() {});
         },
+        child: FutureBuilder(
+          future: _futureItems,
+          builder: (BuildContext context, AsyncSnapshot snapshot) {
+            if (snapshot.hasData) {
+              // Show pie chart and list view of items.
+              final items = snapshot.data!;
+
+              return ListView.builder(
+                itemCount: items.length + 1,
+                itemBuilder: (BuildContext context, int index) {
+                  if (index == 0) return SpendingChart(items: items);
+                  final item = items[index - 1];
+                  return Container(
+                    margin: const EdgeInsets.all(8.0),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10.0),
+                      border: Border.all(
+                        width: 2.0,
+                        color: getCategoryColor(item.category),
+                      ),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Colors.black26,
+                          offset: Offset(0, 2),
+                          blurRadius: 6.0,
+                        )
+                      ],
+                    ),
+                    child: ListTile(
+                      title: Text(item.name),
+                      subtitle: Text(
+                          '${item.category} • ${DateFormat.yMd().format(item.date)}'),
+                      trailing: Text('-\$${item.price.toStringAsFixed(2)}'),
+                    ),
+                  );
+                },
+              );
+            } else if (snapshot.hasError) {
+              // Show failure error message.
+              final failure = snapshot.error as Failure;
+              return Center(child: Text(failure.message));
+            }
+            // Show a loading spinner.
+            return const Center(child: CircularProgressIndicator());
+          },
+        ),
       ),
     );
   }
